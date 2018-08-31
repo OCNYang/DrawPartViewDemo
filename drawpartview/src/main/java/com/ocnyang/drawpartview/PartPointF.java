@@ -11,8 +11,10 @@ import android.graphics.PointF;
  *******************************************************************/
 
 public class PartPointF extends PointF {
+
     private int partNumber;
     private String partName;
+    private boolean checkByPath;
 
     public PartPointF() {
     }
@@ -61,5 +63,13 @@ public class PartPointF extends PointF {
 
     public void setPartName(String partName) {
         this.partName = partName;
+    }
+
+    public boolean isCheckByPath() {
+        return checkByPath;
+    }
+
+    public void setCheckByPath(boolean checkByPath) {
+        this.checkByPath = checkByPath;
     }
 }
