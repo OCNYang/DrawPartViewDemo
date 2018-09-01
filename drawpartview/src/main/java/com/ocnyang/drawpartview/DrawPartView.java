@@ -116,6 +116,9 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
             for (PartPointF partPointF : mPartPointFList) {
                 float realX = ((float) (partPointF.x * mContrastFactor + trans));
                 float realY = ((float) (partPointF.y * mContrastFactor));
+                if (partPointF instanceof PartPathPointF && partPointF.isCheckByPath() && ((PartPathPointF) partPointF).getPath() != null) {
+                    ((PartPathPointF) partPointF).getPath().offset(realX - partPointF.x, realY - ((PartPathPointF) partPointF).y);
+                }
                 partPointF.set(realX, realY);
             }
         }
@@ -145,21 +148,22 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
 
                     Log.e("reat", "" + bounds.left + "," + bounds.top + "," + bounds.right + "," + bounds.bottom);
 
-                    Path pointPath = new Path();
-                    pointPath.addCircle(partPointF.x, partPointF.y, 50, Path.Direction.CCW);
-                    RectF boundsPoint = new RectF();
-                    pointPath.computeBounds(boundsPoint, true);
+                    if (partPointF instanceof PartPathPointF && partPointF.isCheckByPath() && ((PartPathPointF) partPointF).getPath() != null) {
+                        Path pointPath = new Path(((PartPathPointF) partPointF).getPath());
+                        RectF boundsPoint = new RectF();
+                        pointPath.computeBounds(boundsPoint, true);
 
-                    Region regionPoint = new Region();
-                    regionPoint.setPath(pointPath, new Region((int) boundsPoint.left, (int) boundsPoint.top, (int) boundsPoint.right, (int) boundsPoint.bottom));
+                        Region regionPoint = new Region();
+                        regionPoint.setPath(pointPath, new Region((int) boundsPoint.left, (int) boundsPoint.top, (int) boundsPoint.right, (int) boundsPoint.bottom));
 
-//                    if (region.contains(((int) partPointF.x), (int) partPointF.y)) {
-//                        stringBuilder.append(partPointF.getPartName()).append(" ");
-//                    }
-                    if (!region.quickReject(regionPoint) && region.op(regionPoint, Region.Op.INTERSECT)) {
-                        stringBuilder.append(partPointF.getPartName()).append(" ");
+                        if (!region.quickReject(regionPoint) && region.op(regionPoint, Region.Op.INTERSECT)) {
+                            stringBuilder.append(partPointF.getPartName()).append(" ");
+                        }
+                    } else {
+                        if (region.contains(((int) partPointF.x), (int) partPointF.y)) {
+                            stringBuilder.append(partPointF.getPartName()).append(" ");
+                        }
                     }
-
                 }
                 Toast.makeText(this.getContext(), stringBuilder.toString(), Toast.LENGTH_SHORT).show();
             } else {

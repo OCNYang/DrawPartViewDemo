@@ -14,10 +14,7 @@ public class PartPointF extends PointF {
 
     private int partNumber;
     private String partName;
-    private boolean checkByPath;
-
-    public PartPointF() {
-    }
+    private boolean checkByPath = false;
 
     public PartPointF(float x, float y) {
         super(x, y);

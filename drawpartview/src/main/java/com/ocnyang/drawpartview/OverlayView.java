@@ -41,7 +41,7 @@ public class OverlayView extends View {
             mPaint = new Paint();
             mPaint.setStrokeWidth(5);
             mPaint.setColor(Color.RED);
-            mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setStyle(Paint.Style.FILL);
         }
     }
 
@@ -50,8 +50,15 @@ public class OverlayView extends View {
         super.onDraw(canvas);
         if (mPartPointFList != null) {
             for (PartPointF partPointF : mPartPointFList) {
-//                canvas.drawPoint(partPointF.x, partPointF.y, mPaint);
-                canvas.drawCircle(partPointF.x,partPointF.y,50,mPaint);
+//                canvas.drawCircle(partPointF.x, partPointF.y, 50, mPaint);
+                if (partPointF instanceof PartPathPointF && partPointF.isCheckByPath()) {
+                    canvas.drawPath(((PartPathPointF) partPointF).getPath(), mPaint);
+//                    mPaint.setColor(Color.GREEN);
+//                    canvas.drawCircle(partPointF.x, partPointF.y, 45, mPaint);
+//                    mPaint.setColor(Color.RED);
+                } else {
+                    canvas.drawPoint(partPointF.x, partPointF.y, mPaint);
+                }
             }
         }
     }
