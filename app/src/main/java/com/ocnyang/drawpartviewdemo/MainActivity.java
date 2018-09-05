@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mDrawPartView = ((DrawPartView) findViewById(R.id.draw_part_view));
 
-        mDrawPartView.setImageView(R.drawable.dragonfly,2400,1600);
+        mDrawPartView.setImageView(R.drawable.dragonfly, 2400, 1600);
 
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
@@ -119,6 +119,10 @@ public class MainActivity extends AppCompatActivity {
         partPointFList.add(new PartPointF(mDrawPartView.getRealShowX(1769f), mDrawPartView.getRealShowY(941f), 13, "右下翼尖"));
         partPointFList.add(new PartPointF(mDrawPartView.getRealShowX(503f), mDrawPartView.getRealShowY(542f), 14, "左上翼尖"));
         partPointFList.add(new PartPointF(mDrawPartView.getRealShowX(1897f), mDrawPartView.getRealShowY(536f), 15, "右上翼尖"));
+
+        Path path16 = new Path();
+        path16.addOval(mDrawPartView.getRealShowRectF(1104, 405, 1294, 666), Path.Direction.CCW);
+        partPointFList.add(new PartPathPointF(0, 0, 16, "身体", path16));
 
         mDrawPartView.setPartPointFList(partPointFList);
     }
