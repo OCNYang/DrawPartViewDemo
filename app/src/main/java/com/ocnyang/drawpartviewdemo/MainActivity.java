@@ -1,10 +1,11 @@
 package com.ocnyang.drawpartviewdemo;
 
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ViewTreeObserver;
 
 import com.ocnyang.drawpartview.DrawPartView;
@@ -22,7 +23,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mDrawPartView = ((DrawPartView) findViewById(R.id.draw_part_view));
 
-        mDrawPartView.setImageView(R.drawable.dragonfly);
+        mDrawPartView.setImageView(R.drawable.dragonfly,2400,1600);
+
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setStrokeWidth(5);
+        paint.setStyle(Paint.Style.STROKE);
+        mDrawPartView.setFingerTrackPaint(paint);
+
+        Paint paint1 = new Paint();
+        paint1.setColor(0x99ee1111);
+        paint1.setStrokeWidth(2);
+        paint1.setStyle(Paint.Style.STROKE);
+        mDrawPartView.setOverlayViewPaint(paint1);
+
         mDrawPartView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -31,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mDrawPartView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
-                Log.e("ocn", mDrawPartView.getContrastFactor() + ",IIIII2");
                 initDragonflyView();
             }
         });
@@ -39,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDragonflyView() {
         ArrayList<PartPointF> partPointFList = new ArrayList<>();
-
-        Log.e("ocn", mDrawPartView.getContrastFactor() + ",IIIII");
 
         Path path1 = new Path();
         path1.addOval(mDrawPartView.getRealShowRectF(1143f, 198f, 1263f, 398f), Path.Direction.CCW);

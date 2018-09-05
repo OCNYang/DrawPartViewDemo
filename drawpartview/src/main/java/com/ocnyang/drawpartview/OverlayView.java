@@ -71,4 +71,12 @@ public class OverlayView extends View {
         mPartPointFList = partPointFList;
         invalidate();
     }
+
+    public Paint getPaint() {
+        return mPaint;
+    }
+
+    public void setPaint(Paint paint) {
+        mPaint = paint;
+    }
 }

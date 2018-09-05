@@ -1,11 +1,11 @@
 package com.ocnyang.drawpartview;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -27,15 +27,20 @@ import java.util.List;
 public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTrackOverListener {
 
     private List<PartPointF> mPartPointFList;
+
     private int mBitmapWidth;
     private int mBitmapHeight;
     private int mWidth;
     private int mHeight;
+
     private boolean mBitmapShowStatus;
     private double mContrastFactor;
+
     private ImageView mImageView;
     private FingerTrackView mFingerTrackView;
     private OverlayView mOverlayView;
+
+    private ImageLoaderInterface mImageLoaderInterface;
 
     public DrawPartView(@NonNull Context context) {
         this(context, null);
@@ -70,7 +75,6 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
         mWidth = w;
         mHeight = h;
         computeTranslation();
-        Log.e("on size", "w:" + w + "h:" + h);
     }
 
     /**
@@ -84,24 +88,28 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
             //图片显示状态：高度充满，宽度居中
             mBitmapShowStatus = false;
             mContrastFactor = ((double) mHeight / mBitmapHeight);
-            resetPartPointFListByHeight();
 
         } else {
             //图片显示状态：宽度充满，高度居中
             mBitmapShowStatus = true;
             mContrastFactor = ((double) mWidth) / mBitmapWidth;
-            resetPartPointFListByWidth();
         }
     }
 
-    public double getContrastFactor() {
-        return mContrastFactor;
-    }
-
+    /**
+     * 根据图片的显示，将图片的测量坐标转换成显示坐标
+     * @param length 转换长度，比如: radius;
+     * @return
+     */
     public float getRealLength(float length) {
         return ((float) (length * mContrastFactor));
     }
 
+    /**
+     * 将 X 轴方向的测量坐标转换成显示坐标
+     * @param x  X 轴方向的测量坐标
+     * @return x 的实现显示时的坐标
+     */
     public float getRealShowX(float x) {
         if (mBitmapShowStatus) {
             return ((float) (x * mContrastFactor));
@@ -111,6 +119,11 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
         }
     }
 
+    /**
+     * 将 Y 轴方向的测量坐标转换成实际显示坐标
+     * @param y Y 轴方向的测量坐标
+     * @return y 的实现显示时的坐标
+     */
     public float getRealShowY(float y) {
         if (!mBitmapShowStatus) {
             return ((float) (y * mContrastFactor));
@@ -120,6 +133,11 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
         }
     }
 
+    /**
+     * 将测量坐标系的矩形坐标 转换成 实际显示坐标系的矩形坐标
+     * @param rectF
+     * @return
+     */
     public RectF getRealShowRectF(RectF rectF) {
         return getRealShowRectF(rectF.left, rectF.top, rectF.right, rectF.bottom);
     }
@@ -140,33 +158,6 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
             realRectF.bottom = ((float) (bottom * mContrastFactor));
         }
         return realRectF;
-    }
-
-    /**
-     * 根据图片的显示，调整图片的相对于整个 DrawPartView 坐标系的坐标
-     */
-    private void resetPartPointFListByWidth() {
-        if (mPartPointFList != null) {
-            double trans = (mHeight - (mContrastFactor * mBitmapHeight)) / 2;
-
-            for (PartPointF partPointF : mPartPointFList) {
-                float realX = (float) (partPointF.x * mContrastFactor);
-                float realY = (float) (partPointF.y * mContrastFactor + trans);
-                partPointF.set(realX, realY);
-            }
-        }
-    }
-
-    private void resetPartPointFListByHeight() {
-        if (mPartPointFList != null) {
-            double trans = (mWidth - (mContrastFactor * mBitmapWidth)) / 2;
-
-            for (PartPointF partPointF : mPartPointFList) {
-                float realX = ((float) (partPointF.x * mContrastFactor + trans));
-                float realY = ((float) (partPointF.y * mContrastFactor));
-                partPointF.set(realX, realY);
-            }
-        }
     }
 
     /**
@@ -222,12 +213,46 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
         mOverlayView.setPartPointFList(partPointFList);
     }
 
-    public void setImageView(int imgID) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), imgID, options);
-        mBitmapHeight = 1600/*options.outHeight*/;
-        mBitmapWidth = /*options.outWidth*/2400;
-        mImageView.setImageBitmap(bitmap);
-        Log.e("bitmap", "width:" + mBitmapWidth + " height:" + mBitmapHeight);
+    /**
+     * 设置模型图片
+     * @param imgID 模型图片的资源 ID
+     * @param imgAnchorWidth 模型图片的测量宽度（如果测量图片和模型图片大小相同，则等同于模型图片的实际宽度像素）
+     * @param imgAnchorHeight 模型图片的测量高度
+     */
+    public void setImageView(@DrawableRes int imgID, int imgAnchorWidth, int imgAnchorHeight) {
+        mBitmapWidth = imgAnchorWidth;
+        mBitmapHeight = imgAnchorHeight;
+        mImageView.setImageResource(imgID);
+    }
+
+    public void setImageView(@NonNull ImageLoaderInterface imageLoaderInterface,
+                             int imgAnchorWidth, int imgAnchorHeight) {
+        mBitmapWidth = imgAnchorWidth;
+        mBitmapHeight = imgAnchorHeight;
+        imageLoaderInterface.displayImage(mImageView.getContext(), mImageView);
+    }
+
+    public ImageLoaderInterface getImageLoaderInterface() {
+        return mImageLoaderInterface;
+    }
+
+    /**
+     * 设置手指画圈轨迹的画笔样式
+     * @param paint
+     */
+    public void setFingerTrackPaint(Paint paint) {
+        if (mFingerTrackView != null) {
+            mFingerTrackView.setPaint(paint);
+        }
+    }
+
+    /**
+     * 设置锚点、锚点区域绘制时的画笔样式
+     * @param paint
+     */
+    public void setOverlayViewPaint(Paint paint) {
+        if (mOverlayView != null) {
+            mOverlayView.setPaint(paint);
+        }
     }
 }

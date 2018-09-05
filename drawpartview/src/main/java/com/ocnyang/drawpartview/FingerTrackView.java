@@ -44,7 +44,7 @@ public class FingerTrackView extends View {
         if (mPaint == null) {
             mPaint = new Paint();
             mPaint.setStrokeWidth(5);
-            mPaint.setColor(Color.YELLOW);
+            mPaint.setColor(Color.WHITE);
             mPaint.setStyle(Paint.Style.STROKE);
         }
     }
@@ -105,5 +105,13 @@ public class FingerTrackView extends View {
 
     public void setDrawTrackOverListener(DrawTrackOverListener drawTrackOverListener) {
         mDrawTrackOverListener = drawTrackOverListener;
+    }
+
+    public Paint getPaint() {
+        return mPaint;
+    }
+
+    public void setPaint(Paint paint) {
+        mPaint = paint;
     }
 }
