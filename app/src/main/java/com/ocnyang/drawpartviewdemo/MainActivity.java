@@ -1,5 +1,6 @@
 package com.ocnyang.drawpartviewdemo;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -7,8 +8,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewTreeObserver;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.ocnyang.drawpartview.DrawPartView;
+import com.ocnyang.drawpartview.ImageLoaderInterface;
 import com.ocnyang.drawpartview.PartPathPointF;
 import com.ocnyang.drawpartview.PartPointF;
 
@@ -23,7 +27,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mDrawPartView = ((DrawPartView) findViewById(R.id.draw_part_view));
 
-        mDrawPartView.setImageView(R.drawable.dragonfly, 2400, 1600);
+        //加载图片方法一:原生加载，注意当图片过大时，有可能造成内存溢出；
+        //mDrawPartView.setImageView(R.drawable.dragonfly, 2400, 1600);
+
+        //加载图片方法二：使用框架加载
+        mDrawPartView.setImageView(new ImageLoaderInterface() {
+            @Override
+            public void displayImage(Context context, ImageView imageView) {
+                Glide.with(context)
+                        .load(R.drawable.dragonflyw)
+                        .into(imageView);
+            }
+        },2400,1600);
 
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
