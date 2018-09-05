@@ -44,7 +44,7 @@ public class FingerTrackView extends View {
         if (mPaint == null) {
             mPaint = new Paint();
             mPaint.setStrokeWidth(5);
-            mPaint.setColor(Color.WHITE);
+            mPaint.setColor(Color.YELLOW);
             mPaint.setStyle(Paint.Style.STROKE);
         }
     }

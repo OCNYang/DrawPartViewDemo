@@ -94,6 +94,54 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
         }
     }
 
+    public double getContrastFactor() {
+        return mContrastFactor;
+    }
+
+    public float getRealLength(float length) {
+        return ((float) (length * mContrastFactor));
+    }
+
+    public float getRealShowX(float x) {
+        if (mBitmapShowStatus) {
+            return ((float) (x * mContrastFactor));
+        } else {
+            double trans = (mWidth - (mContrastFactor * mBitmapWidth)) / 2;
+            return ((float) (x * mContrastFactor + trans));
+        }
+    }
+
+    public float getRealShowY(float y) {
+        if (!mBitmapShowStatus) {
+            return ((float) (y * mContrastFactor));
+        } else {
+            double trans = (mHeight - (mContrastFactor * mBitmapHeight)) / 2;
+            return ((float) (y * mContrastFactor + trans));
+        }
+    }
+
+    public RectF getRealShowRectF(RectF rectF) {
+        return getRealShowRectF(rectF.left, rectF.top, rectF.right, rectF.bottom);
+    }
+
+    public RectF getRealShowRectF(float left, float top, float right, float bottom) {
+        RectF realRectF = new RectF();
+        if (mBitmapShowStatus) {
+            double trans = (mHeight - (mContrastFactor * mBitmapHeight)) / 2;
+            realRectF.left = ((float) (left * mContrastFactor));
+            realRectF.right = ((float) (right * mContrastFactor));
+            realRectF.top = ((float) (top * mContrastFactor + trans));
+            realRectF.bottom = ((float) (bottom * mContrastFactor + trans));
+        } else {
+            double trans = (mWidth - (mContrastFactor * mBitmapWidth)) / 2;
+            realRectF.left = ((float) (left * mContrastFactor + trans));
+            realRectF.right = ((float) (right * mContrastFactor + trans));
+            realRectF.top = ((float) (top * mContrastFactor));
+            realRectF.bottom = ((float) (bottom * mContrastFactor));
+        }
+        return realRectF;
+    }
+
     /**
      * 根据图片的显示，调整图片的相对于整个 DrawPartView 坐标系的坐标
      */
@@ -116,9 +164,6 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
             for (PartPointF partPointF : mPartPointFList) {
                 float realX = ((float) (partPointF.x * mContrastFactor + trans));
                 float realY = ((float) (partPointF.y * mContrastFactor));
-                if (partPointF instanceof PartPathPointF && partPointF.isCheckByPath() && ((PartPathPointF) partPointF).getPath() != null) {
-                    ((PartPathPointF) partPointF).getPath().offset(realX - partPointF.x, realY - ((PartPathPointF) partPointF).y);
-                }
                 partPointF.set(realX, realY);
             }
         }
@@ -131,44 +176,40 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
      */
     @Override
     public void onDrawTrackOverListener(Path fingerTrackPath) {
-        if (mBitmapShowStatus) {
-            Toast.makeText(this.getContext(), "无处理", Toast.LENGTH_SHORT).show();
-        } else {
-            Path currPath = new Path(fingerTrackPath);
-            StringBuilder stringBuilder = new StringBuilder("");
+        Path currPath = new Path(fingerTrackPath);
+        StringBuilder stringBuilder = new StringBuilder("");
 
-            if (mPartPointFList != null) {
-                for (PartPointF partPointF : mPartPointFList) {
-                    Path path = new Path(currPath);
-                    RectF bounds = new RectF();
-                    path.computeBounds(bounds, true);
+        if (mPartPointFList != null) {
+            for (PartPointF partPointF : mPartPointFList) {
+                Path path = new Path(currPath);
+                RectF bounds = new RectF();
+                path.computeBounds(bounds, true);
 
-                    Region region = new Region();
-                    region.setPath(path, new Region((int) bounds.left, (int) bounds.top, (int) bounds.right, (int) bounds.bottom));
+                Region region = new Region();
+                region.setPath(path, new Region((int) bounds.left, (int) bounds.top, (int) bounds.right, (int) bounds.bottom));
 
-                    Log.e("reat", "" + bounds.left + "," + bounds.top + "," + bounds.right + "," + bounds.bottom);
+                Log.e("reat", "" + bounds.left + "," + bounds.top + "," + bounds.right + "," + bounds.bottom);
 
-                    if (partPointF instanceof PartPathPointF && partPointF.isCheckByPath() && ((PartPathPointF) partPointF).getPath() != null) {
-                        Path pointPath = new Path(((PartPathPointF) partPointF).getPath());
-                        RectF boundsPoint = new RectF();
-                        pointPath.computeBounds(boundsPoint, true);
+                if (partPointF instanceof PartPathPointF && partPointF.isCheckByPath() && ((PartPathPointF) partPointF).getPath() != null) {
+                    Path pointPath = new Path(((PartPathPointF) partPointF).getPath());
+                    RectF boundsPoint = new RectF();
+                    pointPath.computeBounds(boundsPoint, true);
 
-                        Region regionPoint = new Region();
-                        regionPoint.setPath(pointPath, new Region((int) boundsPoint.left, (int) boundsPoint.top, (int) boundsPoint.right, (int) boundsPoint.bottom));
+                    Region regionPoint = new Region();
+                    regionPoint.setPath(pointPath, new Region((int) boundsPoint.left, (int) boundsPoint.top, (int) boundsPoint.right, (int) boundsPoint.bottom));
 
-                        if (!region.quickReject(regionPoint) && region.op(regionPoint, Region.Op.INTERSECT)) {
-                            stringBuilder.append(partPointF.getPartName()).append(" ");
-                        }
-                    } else {
-                        if (region.contains(((int) partPointF.x), (int) partPointF.y)) {
-                            stringBuilder.append(partPointF.getPartName()).append(" ");
-                        }
+                    if (!region.quickReject(regionPoint) && region.op(regionPoint, Region.Op.INTERSECT)) {
+                        stringBuilder.append(partPointF.getPartName()).append(" ");
+                    }
+                } else {
+                    if (region.contains(((int) partPointF.x), (int) partPointF.y)) {
+                        stringBuilder.append(partPointF.getPartName()).append(" ");
                     }
                 }
-                Toast.makeText(this.getContext(), stringBuilder.toString(), Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this.getContext(), "无", Toast.LENGTH_SHORT).show();
             }
+            Toast.makeText(this.getContext(), stringBuilder.toString(), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this.getContext(), "无", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -179,14 +220,13 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
     public void setPartPointFList(List<PartPointF> partPointFList) {
         mPartPointFList = partPointFList;
         mOverlayView.setPartPointFList(partPointFList);
-//        computeTranslation();
     }
 
     public void setImageView(int imgID) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), imgID, options);
-        mBitmapHeight = options.outHeight;
-        mBitmapWidth = options.outWidth;
+        mBitmapHeight = 1600/*options.outHeight*/;
+        mBitmapWidth = /*options.outWidth*/2400;
         mImageView.setImageBitmap(bitmap);
         Log.e("bitmap", "width:" + mBitmapWidth + " height:" + mBitmapHeight);
     }
