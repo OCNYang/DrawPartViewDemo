@@ -20,7 +20,7 @@
 
 判定方式图示：  
 
-<img src="./README_Res/maodian1.png"  width="400px" alt="锚点判定方式"/> <img src="./README_Res/maodian2.png"  width="400px" alt="锚点区域判定方式"/>
+<img src="./README_Res/maodian1.png"  width="450px" alt="锚点判定方式"/> <img src="./README_Res/maodian2.png"  width="450px" alt="锚点区域判定方式"/>
 
 # 使用步骤
 
@@ -32,6 +32,6 @@
 ![蜻蜓坐标系](./README_Res/dragonflyw_spec.png)  
 [查看大图](https://raw.githubusercontent.com/OCNYang/DrawPartViewDemo/master/README_Res/dragonflyw_spec.png)
 
-上述蜻蜓图片的大小为（2400px*1600px），那就以此为坐标系来确定各锚点。这里我在测量坐标时使用的是 [马克鳗](http://www.getmarkman.com/) 这个工具，
+上述蜻蜓图片的大小为（2400px * 1600px），那就以此为坐标系来确定各锚点。这里我在测量坐标时使用的是 [马克鳗](http://www.getmarkman.com/) 这个工具，
 如果想省力，直接把这一步交给美工就好了，哈哈~~~  
 
