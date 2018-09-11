@@ -13,8 +13,8 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /*******************************************************************
@@ -25,6 +25,7 @@ import java.util.List;
  *******************************************************************/
 
 public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTrackOverListener {
+    private static final String TAG = "DrawPartView";
 
     private List<PartPointF> mPartPointFList;
 
@@ -41,6 +42,7 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
     private OverlayView mOverlayView;
 
     private ImageLoaderInterface mImageLoaderInterface;
+    private OnDrawPartResultListener mOnDrawPartResultListener;
 
     public DrawPartView(@NonNull Context context) {
         this(context, null);
@@ -57,16 +59,16 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
                 ViewGroup.LayoutParams.MATCH_PARENT));
         addView(mImageView);
 
+        mOverlayView = new OverlayView(context);
+        mOverlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        addView(mOverlayView);
+
         mFingerTrackView = new FingerTrackView(context);
         mFingerTrackView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         mFingerTrackView.setDrawTrackOverListener(this);
         addView(mFingerTrackView);
-
-        mOverlayView = new OverlayView(context);
-        mOverlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        addView(mOverlayView);
     }
 
     @Override
@@ -98,16 +100,18 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
 
     /**
      * 根据图片的显示，将图片的测量坐标转换成显示坐标
+     *
      * @param length 转换长度，比如: radius;
      * @return
      */
-    public float getRealLength(float length) {
+    public float getRealShowLength(float length) {
         return ((float) (length * mContrastFactor));
     }
 
     /**
      * 将 X 轴方向的测量坐标转换成显示坐标
-     * @param x  X 轴方向的测量坐标
+     *
+     * @param x X 轴方向的测量坐标
      * @return x 的实现显示时的坐标
      */
     public float getRealShowX(float x) {
@@ -121,6 +125,7 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
 
     /**
      * 将 Y 轴方向的测量坐标转换成实际显示坐标
+     *
      * @param y Y 轴方向的测量坐标
      * @return y 的实现显示时的坐标
      */
@@ -135,6 +140,7 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
 
     /**
      * 将测量坐标系的矩形坐标 转换成 实际显示坐标系的矩形坐标
+     *
      * @param rectF
      * @return
      */
@@ -168,9 +174,10 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
     @Override
     public void onDrawTrackOverListener(Path fingerTrackPath) {
         Path currPath = new Path(fingerTrackPath);
-        StringBuilder stringBuilder = new StringBuilder("");
 
         if (mPartPointFList != null) {
+            ArrayList<PartPointF> selectPartList = new ArrayList<>();
+
             for (PartPointF partPointF : mPartPointFList) {
                 Path path = new Path(currPath);
                 RectF bounds = new RectF();
@@ -178,8 +185,6 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
 
                 Region region = new Region();
                 region.setPath(path, new Region((int) bounds.left, (int) bounds.top, (int) bounds.right, (int) bounds.bottom));
-
-                Log.e("reat", "" + bounds.left + "," + bounds.top + "," + bounds.right + "," + bounds.bottom);
 
                 if (partPointF instanceof PartPathPointF && partPointF.isCheckByPath() && ((PartPathPointF) partPointF).getPath() != null) {
                     Path pointPath = new Path(((PartPathPointF) partPointF).getPath());
@@ -190,17 +195,17 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
                     regionPoint.setPath(pointPath, new Region((int) boundsPoint.left, (int) boundsPoint.top, (int) boundsPoint.right, (int) boundsPoint.bottom));
 
                     if (!region.quickReject(regionPoint) && region.op(regionPoint, Region.Op.INTERSECT)) {
-                        stringBuilder.append(partPointF.getPartName()).append(" ");
+                        selectPartList.add(partPointF);
                     }
                 } else {
                     if (region.contains(((int) partPointF.x), (int) partPointF.y)) {
-                        stringBuilder.append(partPointF.getPartName()).append(" ");
+                        selectPartList.add(partPointF);
                     }
                 }
             }
-            Toast.makeText(this.getContext(), stringBuilder.toString(), Toast.LENGTH_SHORT).show();
+            onFeedBackResult(selectPartList);
         } else {
-            Toast.makeText(this.getContext(), "无", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "PartPointList is null,in other words,there is no part data.");
         }
     }
 
@@ -210,13 +215,16 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
 
     public void setPartPointFList(List<PartPointF> partPointFList) {
         mPartPointFList = partPointFList;
-        mOverlayView.setPartPointFList(partPointFList);
+        if (mOverlayView != null) {
+            mOverlayView.setPartPointFList(partPointFList);
+        }
     }
 
     /**
      * 设置模型图片
-     * @param imgID 模型图片的资源 ID
-     * @param imgAnchorWidth 模型图片的测量宽度（如果测量图片和模型图片大小相同，则等同于模型图片的实际宽度像素）
+     *
+     * @param imgID           模型图片的资源 ID
+     * @param imgAnchorWidth  模型图片的测量宽度（如果测量图片和模型图片大小相同，则等同于模型图片的实际宽度像素）
      * @param imgAnchorHeight 模型图片的测量高度
      */
     public void setImageView(@DrawableRes int imgID, int imgAnchorWidth, int imgAnchorHeight) {
@@ -238,6 +246,7 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
 
     /**
      * 设置手指画圈轨迹的画笔样式
+     *
      * @param paint
      */
     public void setFingerTrackPaint(Paint paint) {
@@ -248,11 +257,38 @@ public class DrawPartView extends FrameLayout implements FingerTrackView.DrawTra
 
     /**
      * 设置锚点、锚点区域绘制时的画笔样式
+     *
      * @param paint
      */
     public void setOverlayViewPaint(Paint paint) {
         if (mOverlayView != null) {
             mOverlayView.setPaint(paint);
         }
+    }
+
+    public void showOverlayView(boolean visible) {
+        if (mOverlayView != null) {
+            mOverlayView.setVisibility(visible ? VISIBLE : GONE);
+        }
+    }
+
+    private void onFeedBackResult(List<PartPointF> partPointFList) {
+        if (mOnDrawPartResultListener == null) {
+            return;
+        }
+
+        mOnDrawPartResultListener.onDrawPartResult(partPointFList);
+    }
+
+    public interface OnDrawPartResultListener {
+        void onDrawPartResult(List<PartPointF> partPointFList);
+    }
+
+    public OnDrawPartResultListener getOnDrawPartResultListener() {
+        return mOnDrawPartResultListener;
+    }
+
+    public void setOnDrawPartResultListener(OnDrawPartResultListener onDrawPartResultListener) {
+        mOnDrawPartResultListener = onDrawPartResultListener;
     }
 }

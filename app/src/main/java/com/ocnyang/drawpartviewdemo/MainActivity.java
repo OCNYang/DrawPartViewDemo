@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.ocnyang.drawpartview.DrawPartView;
@@ -17,6 +18,7 @@ import com.ocnyang.drawpartview.PartPathPointF;
 import com.ocnyang.drawpartview.PartPointF;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private DrawPartView mDrawPartView;
@@ -30,32 +32,51 @@ public class MainActivity extends AppCompatActivity {
         //加载图片方法一:原生加载，注意当图片过大时，有可能造成内存溢出；
         //mDrawPartView.setImageView(R.drawable.dragonfly, 2400, 1600);
 
-        //加载图片方法二：使用框架加载
+        //加载图片方法二（推荐）：使用框架加载
         mDrawPartView.setImageView(new ImageLoaderInterface() {
             @Override
             public void displayImage(Context context, ImageView imageView) {
+                //请使用图片的默认显示方式，不要设置图片 ScaleType 的显示方式。
                 Glide.with(context)
                         .load(R.drawable.dragonflyw)
                         .into(imageView);
             }
-        },2400,1600);
+        }, 2400, 1600);//设置模型图片测量锚点时的宽度和高度
 
-        Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
-        paint.setStrokeWidth(5);
-        paint.setStyle(Paint.Style.STROKE);
-        mDrawPartView.setFingerTrackPaint(paint);
+        //设置画圈时手指轨迹的画笔样式
+        Paint fingerTrackPaint = new Paint();
+        fingerTrackPaint.setColor(Color.BLACK);
+        fingerTrackPaint.setStrokeWidth(5);
+        fingerTrackPaint.setStyle(Paint.Style.STROKE);
+        mDrawPartView.setFingerTrackPaint(fingerTrackPaint);
 
-        Paint paint1 = new Paint();
-        paint1.setColor(0x99ee1111);
-        paint1.setStrokeWidth(2);
-        paint1.setStyle(Paint.Style.STROKE);
-        mDrawPartView.setOverlayViewPaint(paint1);
+        //设置覆盖层锚点区域绘制时的画笔样式
+        Paint overlayViewPaint = new Paint();
+        overlayViewPaint.setColor(0x99ee1111);
+        overlayViewPaint.setStrokeWidth(2);
+        overlayViewPaint.setStyle(Paint.Style.STROKE);
+        mDrawPartView.setOverlayViewPaint(overlayViewPaint);
 
+        mDrawPartView.showOverlayView(false);
+
+        //设置画圈结果的监听器
+        mDrawPartView.setOnDrawPartResultListener(new DrawPartView.OnDrawPartResultListener() {
+            @Override
+            public void onDrawPartResult(List<PartPointF> partPointFList) {
+                StringBuilder stringBuilder = new StringBuilder("圈中了：");
+                for (PartPointF partPointF : partPointFList) {
+                    stringBuilder.append(partPointF.getPartName()).append(" ");
+                }
+                Toast.makeText(MainActivity.this, stringBuilder.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //设置监听 DrawPartView 测量完成的回调方法，保证是在 DrawPartView 测量完毕后设置锚点集
         mDrawPartView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 if (Build.VERSION.SDK_INT >= 16) {
+                    //去除监听，保证只回调一次，防止多次设置锚点集
                     mDrawPartView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
                     mDrawPartView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
@@ -63,8 +84,12 @@ public class MainActivity extends AppCompatActivity {
                 initDragonflyView();
             }
         });
+
     }
 
+    /**
+     * 根据模型图片测量的坐标设置锚点集
+     */
     private void initDragonflyView() {
         ArrayList<PartPointF> partPointFList = new ArrayList<>();
 
@@ -74,8 +99,8 @@ public class MainActivity extends AppCompatActivity {
 
         Path path2_1 = new Path();
         Path path2_2 = new Path();
-        path2_1.addCircle(mDrawPartView.getRealShowX(1142f), mDrawPartView.getRealShowY(311), mDrawPartView.getRealLength(77), Path.Direction.CCW);
-        path2_2.addCircle(mDrawPartView.getRealShowX(1272f), mDrawPartView.getRealShowY(311), mDrawPartView.getRealLength(77), Path.Direction.CCW);
+        path2_1.addCircle(mDrawPartView.getRealShowX(1142f), mDrawPartView.getRealShowY(311), mDrawPartView.getRealShowLength(77), Path.Direction.CCW);
+        path2_2.addCircle(mDrawPartView.getRealShowX(1272f), mDrawPartView.getRealShowY(311), mDrawPartView.getRealShowLength(77), Path.Direction.CCW);
         path2_1.op(path2_2, Path.Op.XOR);
         partPointFList.add(new PartPathPointF(0, 0, 2, "眼睛", path2_1));
 
@@ -109,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
         Path path7_1 = new Path();
         Path path7_2 = new Path();
-        path7_1.addCircle(mDrawPartView.getRealShowX(1200f), mDrawPartView.getRealShowY(783f), mDrawPartView.getRealLength(67), Path.Direction.CCW);
+        path7_1.addCircle(mDrawPartView.getRealShowX(1200f), mDrawPartView.getRealShowY(783f), mDrawPartView.getRealShowLength(67), Path.Direction.CCW);
         path7_2.addRect(mDrawPartView.getRealShowRectF(1133f, 735f, 1267f, 832f), Path.Direction.CCW);
         path7_1.op(path7_2, Path.Op.UNION);
         partPointFList.add(new PartPathPointF(0, 0, 7, "尾节1", path7_1));
