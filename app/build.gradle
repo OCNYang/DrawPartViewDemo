@@ -28,5 +28,6 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.7.1") {
         exclude group: "com.android.support"
     }
-    implementation project(':drawpartview')
+//    implementation project(':drawpartview')
+    implementation 'com.github.OCNYang:DrawPartViewDemo:v1.0.0'
 }

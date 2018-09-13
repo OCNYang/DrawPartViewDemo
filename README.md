@@ -24,7 +24,24 @@
 
 # 使用步骤
 
-**1. 准备模型图片和确定锚点坐标**
+**1. 引入并依赖库**  
+
+引入库的方式：  
+**Step 1.** Add it in your root build.gradle at the end of repositories:
+
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+**Step 2.** Add the dependency
+
+	dependencies {
+	        implementation 'com.github.OCNYang:DrawPartViewDemo:v1.0.0'
+	}
+
+**2. 准备模型图片和确定锚点坐标**
 
 确定你的模型图片，然后根据模型图片的 **宽px像素值为X轴、高px像素值为Y轴、模型图片的左上角为原点、向右和向下为正方向**，通过上述这个坐标系来
 确定和测量各锚点坐标、各锚点区域关键点坐标。如下图：  
@@ -35,7 +52,7 @@
 上述蜻蜓图片的大小为（2400px * 1600px），那就以此为坐标系来确定各锚点。这里我在测量坐标时使用的是 [马克鳗](http://www.getmarkman.com/) 这个工具，
 如果想省力，直接把这一步交给美工就好了，哈哈~~~  
 
-**2. 在布局中使用 DrawPartView**  
+**3. 在布局中使用 DrawPartView**  
 
 和普通控件相同，直接在布局 xml 文件需要的地方使用 DrawPartView，同时需要说明的是 DrawPartView 并没有提供自定义的属性，都需要
 在代码中动态设置。
@@ -93,7 +110,7 @@
         }
     });
 
-**3. 设置锚点区域坐标集**  
+**4. 设置锚点区域坐标集**  
 
 根据上面第 1 步准备好的模型图片和测量坐标，来对 DrawPartView 设置锚点坐标 & 锚点区域。  
 设置时有几点需要值得注意，必须遵从否则可能达不到预期的效果：  
