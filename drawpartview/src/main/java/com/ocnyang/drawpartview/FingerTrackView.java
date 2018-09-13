@@ -94,6 +94,7 @@ public class FingerTrackView extends View {
     public interface DrawTrackOverListener {
         /**
          * 画圈完成后的回调
+         *
          * @param fingerTrackPath 画圈的路径
          */
         void onDrawTrackOverListener(Path fingerTrackPath);
