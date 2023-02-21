@@ -4,7 +4,7 @@
 这是一个对特定场景的库，可能单单看简单的描述无法知道它的应用场景，这里举个例子你就能明白了。  
 我见到这个应用场景是在公司合作的第三方平台提供的库里面，通过在车的模型图片上画圈，来获取画圈部位的车的配件名称列表，效果如下图：  
 
-![在车模型图片上画圈定位配件](./README_Res/car_draw_cir.gif)  
+<img alt="在车模型图片上画圈定位配件" src="https://cdn.jsdelivr.net/gh/ocnyang/DrawPartViewDemo@master/README_Res/car_draw_cir.gif" width="30%"/>  
 
 # 本库实现功能
 
@@ -20,7 +20,7 @@
 
 判定方式图示：  
 
-<img src="./README_Res/maodian1.png"  width="450px" alt="锚点判定方式"/> <img src="./README_Res/maodian2.png"  width="450px" alt="锚点区域判定方式"/>
+<img src="https://cdn.jsdelivr.net/gh/ocnyang/DrawPartViewDemo@master/README_Res/maodian1.png"  width="450px" alt="锚点判定方式"/> <img src="https://cdn.jsdelivr.net/gh/ocnyang/DrawPartViewDemo@master/README_Res/maodian2.png"  width="450px" alt="锚点区域判定方式"/>
 
 # 使用步骤
 
@@ -47,8 +47,8 @@
 确定你的模型图片，然后根据模型图片的 **宽px像素值为X轴、高px像素值为Y轴、模型图片的左上角为原点、向右和向下为正方向**，通过上述这个坐标系来
 确定和测量各锚点坐标、各锚点区域关键点坐标。如下图：  
 
-![蜻蜓坐标系](./README_Res/dragonflyw_spec.png)  
-[查看大图](https://raw.githubusercontent.com/OCNYang/DrawPartViewDemo/master/README_Res/dragonflyw_spec.png)
+![蜻蜓坐标系](https://cdn.jsdelivr.net/gh/ocnyang/DrawPartViewDemo@master/README_Res/dragonflyw_spec.png)  
+[查看大图](https://cdn.jsdelivr.net/gh/ocnyang/DrawPartViewDemo@master/README_Res/dragonflyw_spec.png)
 
 上述蜻蜓图片的大小为（2400px * 1600px），那就以此为坐标系来确定各锚点。这里我在测量坐标时使用的是 [马克鳗](http://www.getmarkman.com/) 这个工具，
 如果想省力，直接把这一步交给美工就好了，哈哈~~~  
